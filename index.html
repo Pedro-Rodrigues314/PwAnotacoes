@@ -1,0 +1,186 @@
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/variables.css">
+</head>
+
+<body>
+    <div class="cabecalho">
+        <div class="dropdown">
+            <div id="areaDoUsuario"> </div>
+            <div class="dropdown-child">
+                <p id="nome"></p>
+                <p id="email"></p>
+                <button onclick="sair()">Sair</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="corpo">
+        <div class="form">
+            <label>Data: </label>
+            <input type="date" id="data">
+            <label>Título: </label>
+            <input type="text" id="titulo">
+            <label>Descrição: </label>
+            <input type="text" id="descricao">
+
+            <button onclick="adicionar()">Adicionar</button>
+        </div>
+        <table border="1">
+            <thead>
+                <td>
+                    DATA
+
+                    <div class="formato">
+                        <label>Formato: </label>
+                        <select id="forma">
+							<option value="">Selecione...</option>
+							<option value="DD/MM/YYYY">DIA/MÊS/ANO</option>
+							<option value="MM/DD/YYYY">MÊS/DIA/ANO</option>
+							<option value="YYYY/MM/DD">ANO/MÊS/DIA</option>
+							
+						</select>
+                    </div>
+                </td>
+                <td>
+                    TÍTULO
+                </td>
+                <td>
+                    DESCRIÇÃO
+                </td>
+            </thead>
+            <tbody id="tabelinha">
+
+            </tbody>
+        </table>
+    </div>
+
+    <script src="moment.js"></script>
+    <script>
+        const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
+        const usuarios = JSON.parse(localStorage.getItem("usuarios"));
+
+        let mudou = JSON.parse(localStorage.getItem("mudou")) || false;
+
+        if (usuarioLogado == null) {
+            alert("Nenhum Usuario Logado!");
+            window.location.href = "login.html";
+        }
+
+        let formato = document.getElementById("forma");
+        formato.addEventListener("change", function() {
+            if (formato.value != "") {
+                usuarioLogado.formato = formato.value;
+                usuarios[usuarioLogado.posicao].formato = formato.value;
+
+                localStorage.setItem("mudou", true);
+
+                localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
+                localStorage.setItem("usuarios", JSON.stringify(usuarios));
+                window.location.reload();
+            }
+
+        });
+        if (mudou) {
+            formato.value = usuarioLogado.formato;
+        }
+
+
+        document.getElementById("nome").innerHTML = usuarioLogado.nome.bold();
+        document.getElementById("email").innerHTML = usuarioLogado.email.bold();
+
+
+        if (usuarioLogado.anotacoes.length != 0) {
+            usuarioLogado.anotacoes.forEach(element => {
+                criarLinha(moment(element.data), element.titulo, element.descricao);
+            });
+        }
+
+        function adicionar() {
+            const data = moment(document.getElementById("data").value);
+            const titulo = document.getElementById("titulo").value;
+            const descricao = document.getElementById("descricao").value;
+
+            if (document.getElementById("data").value != "" && titulo != "" && descricao != "") {
+
+                criarLinha(data, titulo, descricao);
+
+                usuarioLogado.anotacoes.push({
+                    data,
+                    titulo,
+                    descricao
+                });
+
+                localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
+
+                usuarios[usuarioLogado.posicao].anotacoes.push({
+                    data,
+                    titulo,
+                    descricao
+                });
+
+                localStorage.setItem("usuarios", JSON.stringify(usuarios));
+            } else {
+                alert("Preencha todos os campos!!");
+            }
+        }
+
+        function criarLinha(data, titulo, descricao) {
+            let linha = document.createElement('tr');
+
+            let dataE = document.createElement('td');
+            dataE.innerHTML = data.format(usuarioLogado.formato);
+
+            let tituloE = document.createElement('td');
+            tituloE.innerHTML = titulo;
+
+            let descricaoE = document.createElement('td');
+            descricaoE.innerHTML = descricao;
+
+
+            let exc = document.createElement('button');
+            exc.innerHTML = "EXCLUIR";
+            exc.addEventListener("click", function() {
+                    if(confirm("Quer realmente deletar a anotação?")){
+                        exc.parentNode.remove();
+
+                        for (let i = 0; i < usuarioLogado.anotacoes.length; i++) {
+                            if (moment(usuarioLogado.anotacoes[i].data).format() == data.format() && usuarioLogado.anotacoes[i].titulo == titulo && usuarioLogado.anotacoes[i].descricao == descricao) {
+                                usuarioLogado.anotacoes.splice(i, 1);
+
+                                localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
+
+                                usuarios[usuarioLogado.posicao].anotacoes.splice(i, 1);
+
+                                localStorage.setItem("usuarios", JSON.stringify(usuarios));
+                            break;
+                            }
+                        }
+                    }
+                
+            });
+
+            exc.classList.add("exc");
+
+            linha.appendChild(dataE);
+            linha.appendChild(tituloE);
+            linha.appendChild(descricaoE);
+            linha.appendChild(exc);
+
+            document.getElementById("tabelinha").appendChild(linha);
+        }
+
+        function sair() {
+            localStorage.setItem("usuarioLogado", null);
+            localStorage.setItem("mudou", false);
+            window.location.reload();
+        }
+    </script>
+</body>
+
+</html>
