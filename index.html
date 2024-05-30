@@ -96,8 +96,8 @@
 
 
         if (usuarioLogado.anotacoes.length != 0) {
-            usuarioLogado.anotacoes.forEach(element => {
-                criarLinha(moment(element.data), element.titulo, element.descricao);
+            usuarioLogado.anotacoes.forEach(anotacao => {
+                criarLinha(moment(anotacao.data), anotacao.titulo, anotacao.descricao);
             });
         }
 
@@ -158,7 +158,7 @@
                                 usuarios[usuarioLogado.posicao].anotacoes.splice(i, 1);
 
                                 localStorage.setItem("usuarios", JSON.stringify(usuarios));
-                            break;
+                                break;
                             }
                         }
                     }
