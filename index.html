@@ -39,7 +39,6 @@
                     <div class="formato">
                         <label>Formato: </label>
                         <select id="forma">
-							<option value="">Selecione...</option>
 							<option value="DD/MM/YYYY">DIA/MÊS/ANO</option>
 							<option value="MM/DD/YYYY">MÊS/DIA/ANO</option>
 							<option value="YYYY/MM/DD">ANO/MÊS/DIA</option>
@@ -63,9 +62,7 @@
     <script src="moment.js"></script>
     <script>
         const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
-        const usuarios = JSON.parse(localStorage.getItem("usuarios"));
-
-        let mudou = JSON.parse(localStorage.getItem("mudou")) || false;
+        const usuarios = JSON.parse(localStorage.getItem("usuarios"));  
 
         if (usuarioLogado == null) {
             alert("Nenhum Usuario Logado!");
@@ -73,12 +70,11 @@
         }
 
         let formato = document.getElementById("forma");
+        formato.value = usuarioLogado.formato;
         formato.addEventListener("change", function() {
             if (formato.value != "") {
                 usuarioLogado.formato = formato.value;
                 usuarios[usuarioLogado.posicao].formato = formato.value;
-
-                localStorage.setItem("mudou", true);
 
                 localStorage.setItem("usuarioLogado", JSON.stringify(usuarioLogado));
                 localStorage.setItem("usuarios", JSON.stringify(usuarios));
@@ -86,14 +82,9 @@
             }
 
         });
-        if (mudou) {
-            formato.value = usuarioLogado.formato;
-        }
-
 
         document.getElementById("nome").innerHTML = usuarioLogado.nome.bold();
         document.getElementById("email").innerHTML = usuarioLogado.email.bold();
-
 
         if (usuarioLogado.anotacoes.length != 0) {
             usuarioLogado.anotacoes.forEach(anotacao => {
@@ -177,7 +168,6 @@
 
         function sair() {
             localStorage.setItem("usuarioLogado", null);
-            localStorage.setItem("mudou", false);
             window.location.reload();
         }
     </script>
